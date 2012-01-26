@@ -1,0 +1,17 @@
+{% extends "webstats/webstats.html" %}
+{% comment %}
+
+Main page of the webstats.
+
+{% endcomment %}
+
+{% block title %}
+  webstats
+{% endblock %}
+
+{% block content %}
+  <section>
+    <h2>Welcome, {{ user.username }}</h2>
+    <p>This is the main page of the web statistics.</p>
+  </section>
+{% endblock %}
