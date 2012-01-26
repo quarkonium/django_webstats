@@ -14,4 +14,14 @@ Main page of the webstats.
     <h2>Welcome, {{ user.username }}</h2>
     <p>This is the main page of the web statistics.</p>
   </section>
+
+  {% if visitor_list %}
+    <ul>
+      {% for v in visitor_list %}
+        <li><a href="/visitor/{{ v.id }}/">{{ v.referer }}</a></li>
+      {% endfor %}
+    </ul>
+      {% else %}
+        <p>There were no visitors.</p>
+  {% endif %}
 {% endblock %}
