@@ -1,6 +1,8 @@
 # Create your views here.
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from datetime import datetime
 
 @login_required
 def webstats_main_page(request):
