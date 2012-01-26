@@ -3,6 +3,6 @@ from webstats.views import *
 
 urlpatterns = patterns('',
   # Main webstats entrance.
-  (r'^$', webstats_track),
+  (r'track/', webstats_track),
   (r'^$', webstats_main_page),
 )

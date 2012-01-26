@@ -9,7 +9,6 @@ urlpatterns = patterns('',
   (r'^logout/$', logout_page),
 
   # webstats
-  (r'^webstats_track/', include('webstats.urls')),
   (r'^webstats/', include('webstats.urls')),
 
   # Serve static content.
