@@ -15,9 +15,9 @@ def webstats_main_page(request):
   take them to the login page.
   """
 
-  lu = { 'days' : [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],\
-          'total_visits' : [18, 22, 30, 34, 40, 47],\
-          'total_unique_visits' : [1, 2, 4, 4, 5, 7] }
+  lu = { 'categories' : [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],\
+          'total_visits' : [18, 22, 30, 34, 40, 47, 50],\
+          'total_unique_visits' : [1, 2, 4, 4, 5, 7, 50] }
           
   js_data = simplejson.dumps(lu);
 
