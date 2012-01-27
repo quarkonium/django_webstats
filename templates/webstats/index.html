@@ -1,4 +1,5 @@
 {% extends "webstats/webstats.html" %}
+
 {% comment %}
 
 Main page of the webstats.
@@ -18,10 +19,78 @@ Main page of the webstats.
   {% if visitor_list %}
     <ul>
       {% for v in visitor_list %}
-        <li><a href="/visitor/{{ v.id }}/">{{ v.referer }}</a></li>
+        <li>{{ v.ip }} {{ v.referer }} {{ v.time }}</li>
       {% endfor %}
     </ul>
       {% else %}
         <p>There were no visitors.</p>
   {% endif %}
+<script type="text/javascript">
+  var chart;
+  var data_test;
+  jQuery(document).ready(function() {
+    data_from_django = "{{ js_data }}";
+    data_from_django = data_from_django.replace(/&quot;/g,'\'');
+    data_test = eval('('+data_from_django+')');
+
+    //alert(data_test['categories'
+    var chart_data = {
+      chart: {
+        renderTo: 'enrollment_container',
+        defaultSeriesType: 'line',
+        marginRight: 130,
+        marginBottom: 30
+      },
+      title: {
+        text: 'Total number of visits per day',
+        x: -20 //center
+      },
+      subtitle: {
+        text: '',
+        x: -20
+      },
+      xAxis: {
+      },
+      yAxis: {
+        title: {
+          text: 'Total number of visits'
+        },
+        plotLines: [{
+          value: 0,
+          width: 1,
+          color: '#808080'
+        }]
+      },
+      tooltip: {
+        formatter: function() {
+          return ''+ this.series.name +''+this.x +': '+ this.y;
+        }
+      },
+      legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'top',
+        x: -10,
+        y: 100,
+        borderWidth: 0
+      },
+      series: [{
+        name: 'Total visits',
+	data: [{{ total_enrolled|join:"," }}]
+        }, {
+          name: 'Unique visits',
+          data: [{{ undergrad|join:"," }}]
+          }]
+    };
+
+    chart_data['xAxis']['days'] = data_test['days'];
+    chart_data['series'][0]['data'] = data_test['total_visits'];
+
+    //alert(chart_data['xAxis']['categories']);
+    //alert(JSON.stringify(chart_data));
+
+    chart = new Highcharts.Chart(chart_data);
+  });
+</script>
+  <div id="enrollment_container" style="width: 700px;height: 500px"></div>
 {% endblock %}

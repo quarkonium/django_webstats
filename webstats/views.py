@@ -6,7 +6,7 @@ from django.template import Context, loader
 from django_webstats.webstats.models import Visitor
 from datetime import datetime
 from django.template import RequestContext
-
+from django.utils import simplejson
 
 @login_required
 def webstats_main_page(request):
@@ -15,15 +15,26 @@ def webstats_main_page(request):
   take them to the login page.
   """
 
+  lu = { 'days' : [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],\
+          'total_visits' : [18, 22, 30, 34, 40, 47],\
+          'total_unique_visits' : [1, 2, 4, 4, 5, 7] }
+          
+  js_data = simplejson.dumps(lu);
+
+  print js_data
+
   visitor_list = Visitor.objects.all()
   #t = loader.get_template('webstats/index.html')
   c = Context({
     'visitor_list': visitor_list,
+    'js_data': js_data,
   })
   #return render_to_response(t.render(c))
   return render_to_response('webstats/index.html',
                             c,
                             context_instance=RequestContext(request))
+
+webstats_main_page.allow_tags = True
 
 def webstats_track(request):
   print request
