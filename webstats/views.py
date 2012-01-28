@@ -7,6 +7,7 @@ from django_webstats.webstats.models import Visitor
 from datetime import datetime
 from django.template import RequestContext
 from django.utils import simplejson
+import calendar
 
 @login_required
 def webstats_main_page(request):
@@ -15,9 +16,24 @@ def webstats_main_page(request):
   take them to the login page.
   """
 
-  lu = { 'categories' : [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],\
-          'total_visits' : [18, 22, 30, 34, 40, 47, 50],\
-          'total_unique_visits' : [1, 2, 4, 4, 5, 7, 50] }
+  #month_array = Visitor.objects.dates('time','month',order='DESC') 
+
+  #months = []
+  #for m in month_array:
+  #  month = " %s %d " % (calendar.month_name[m.month], m.year)
+  #  months.append(month)
+
+  total_visits_array = []
+  for m in range(1, 13):
+    total_visits_array.append(Visitor.objects.filter(time__year='2012', time__month=m).count())
+
+  unique_visits_array = []
+  for m in range(1, 13):
+    unique_visits_array.append(Visitor.objects.values('ip').distinct().filter(time__year='2012', time__month=m).count())
+    
+  lu = { 'categories' : ['Jan 2012', 'Feb 2012', 'Mar 2012', 'Apr 2012', 'May 2012', 'Jun 2012', 'Jul 2012', 'Aug 2012', 'Sep 2012', 'Oct 2012', 'Nov 2012', 'Dec 2012'],\
+          'total_visits' : total_visits_array,\
+          'total_unique_visits' : unique_visits_array }
           
   js_data = simplejson.dumps(lu);
 

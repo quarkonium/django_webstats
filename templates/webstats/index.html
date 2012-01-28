@@ -37,7 +37,7 @@ Main page of the webstats.
     var chart_data = {
       chart: {
         renderTo: 'enrollment_container',
-        defaultSeriesType: 'line',
+        defaultSeriesType: 'column',
         marginRight: 130,
         marginBottom: 30
       },
@@ -85,6 +85,7 @@ Main page of the webstats.
 
     chart_data['xAxis']['categories'] = data_test['categories'];
     chart_data['series'][0]['data'] = data_test['total_visits'];
+    chart_data['series'][1]['data'] = data_test['total_unique_visits'];
 
     //alert(chart_data['xAxis']['categories']);
     //alert(JSON.stringify(chart_data));
