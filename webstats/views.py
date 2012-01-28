@@ -29,7 +29,7 @@ def webstats_main_page(request):
 
   unique_visits_array = []
   for m in range(1, 13):
-    unique_visits_array.append(Visitor.objects.values('ip').distinct().filter(time__year='2012', time__month=m).count())
+    unique_visits_array.append(Visitor.objects.values('x_ff').distinct().filter(time__year='2012', time__month=m).count())
     
   lu = { 'categories' : ['Jan 2012', 'Feb 2012', 'Mar 2012', 'Apr 2012', 'May 2012', 'Jun 2012', 'Jul 2012', 'Aug 2012', 'Sep 2012', 'Oct 2012', 'Nov 2012', 'Dec 2012'],\
           'total_visits' : total_visits_array,\
@@ -55,11 +55,11 @@ webstats_main_page.allow_tags = True
 def webstats_track(request):
   print request
   v = Visitor()
-  #v.ip = request.META.get("HTTP_X_FORWARDED_FOR", "") #get visitor ip
-  v.ip = request.META.get("REMOTE_ADDR", "") #get visitor ip
-  v.time = datetime.now() # get visitor time
-  v.referer = request.META.get("HTTP_REFERER", "") #get visitor referer
-  v.user_agent = request.META.get("HTTP_USER_AGENT", "") # get visitor user agent
+  v.x_ff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+  v.remote_addr = request.META.get("REMOTE_ADDR", "")
+  v.time = datetime.now()
+  v.referer = request.META.get("HTTP_REFERER", "")
+  v.user_agent = request.META.get("HTTP_USER_AGENT", "")
   v.save() 
 
   TRANSPARENT_1_PIXEL_GIF = "\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b"
