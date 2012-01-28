@@ -5,7 +5,7 @@ jQuery(document).ready(function() {
   //alert(data_test['categories'
   var chart_data = {
     chart: {
-      renderTo: 'enrollment_container',
+      renderTo: 'chart_container',
       defaultSeriesType: 'column',
       marginRight: 130,
       marginBottom: 30
