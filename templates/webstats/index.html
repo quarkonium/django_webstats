@@ -1,35 +1,36 @@
-{% extends "webstats/webstats.html" %}
-
+{% extends "base.html" %}
 {% comment %}
-
-Main page of the webstats.
 
 {% endcomment %}
 
-{% block title %}
-  webstats
+{% block head %}
+  <title>Django webstats | {% block title %}{% endblock %}</title>
 {% endblock %}
 
-{% block content %}
+{% block body %}
+  <header>
+    <h1>Django webstats | Web stats</h1>
+  </header>
+
   <section>
-    <h2>Welcome, {{ user.username }}</h2>
-    <p>This is the main page of the web statistics.</p>
+    {% if website_list %}
+      <ul>
+        {% for w in website_list %}
+	<li><a href="/webstats/main/{{ w.id }}">{{ w.domain }}, last activity {{ w.last_activity }}</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>There are no websites currently being monitored.</p>
+    {% endif %}
+
+    <ul>
+      <li><a href="/">home</a></li>
+      <li><a href="/logout/">logout</a></li>
+    </ul>
   </section>
 
-  {% if visitor_list %}
-    <ul>
-      {% for v in visitor_list %}
-        <li>{{ v.ip }} {{ v.referer }} {{ v.time }}</li>
-      {% endfor %}
-    </ul>
-      {% else %}
-        <p>There were no visitors.</p>
-  {% endif %}
-  <script>
-    data_from_django = "{{ js_data }}";
-    data_from_django = data_from_django.replace(/&quot;/g,'\'');
-    data_test = eval('('+data_from_django+')');
-  </script>
-  <script src="{{ MEDIA_URL }}js/charts/total_month_histogram.js" type="text/javascript"></script>
-  <div id="chart_container" style="width: 700px;height: 200px"></div>
+{% block content %}{% endblock %}
+  <footer>
+    <span>Django webstats</span>
+  </footer>
 {% endblock %}

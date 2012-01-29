@@ -3,14 +3,26 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.template import Context, loader
+from django_webstats.webstats.models import Website
 from django_webstats.webstats.models import Visitor
 from datetime import datetime
 from django.template import RequestContext
 from django.utils import simplejson
+from urlparse import urlparse
 import calendar
 
 @login_required
-def webstats_main_page(request):
+def webstats_index(request):
+  website_list = Website.objects.all()
+  c = Context({
+    'website_list': website_list,
+  })
+  return render_to_response('webstats/index.html',
+                            c,
+                            context_instance=RequestContext(request))
+
+@login_required
+def webstats_main_page(request, id):
   """
   If users are authenticated, direct them to the main page. Otherwise,
   take them to the login page.
@@ -40,26 +52,39 @@ def webstats_main_page(request):
   print js_data
 
   visitor_list = Visitor.objects.all()
-  #t = loader.get_template('webstats/index.html')
   c = Context({
     'visitor_list': visitor_list,
     'js_data': js_data,
   })
-  #return render_to_response(t.render(c))
-  return render_to_response('webstats/index.html',
+  return render_to_response('webstats/webstats.html',
                             c,
                             context_instance=RequestContext(request))
 
 webstats_main_page.allow_tags = True
 
 def webstats_track(request):
-  print request
+  #print request
   v = Visitor()
   v.x_ff = request.META.get("HTTP_X_FORWARDED_FOR", "")
   v.remote_addr = request.META.get("REMOTE_ADDR", "")
   v.time = datetime.now()
   v.referer = request.META.get("HTTP_REFERER", "")
   v.user_agent = request.META.get("HTTP_USER_AGENT", "")
+
+  url = urlparse(v.referer)
+  
+  w_array = Website.objects.filter(domain=url.netloc)
+  if len(w_array) == 0:
+    w = Website()
+    w.domain = url.netloc
+    w.last_activity=datetime.now()
+    w.save()
+    v.website_id=w.id
+  else:
+    v.website_id=w_array[0].id
+    w_array[0].last_activity=datetime.now()
+    w_array[0].save()
+
   v.save() 
 
   TRANSPARENT_1_PIXEL_GIF = "\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b"
