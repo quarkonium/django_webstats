@@ -76,6 +76,7 @@ def webstats_track(request):
   v.user_agent = request.META.get("HTTP_USER_AGENT", "")
 
   url = urlparse(v.referer)
+  v.path = url.path
   
   w_array = Website.objects.filter(domain=url.netloc)
   if len(w_array) == 0:

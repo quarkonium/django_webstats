@@ -11,7 +11,7 @@ jQuery(document).ready(function() {
       marginBottom: 30
     },
     title: {
-      text: 'Total number of visits per day',
+      text: 'Visits per month',
       x: -20 //center
     },
     subtitle: {
