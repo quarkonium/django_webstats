@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% comment %}
+
+{% endcomment %}
+
+{% block head %}
+  <title>Django webstats | {% block title %}{% endblock %}</title>
+{% endblock %}
+
+{% block body %}
+  <header>
+    <h1>Django webstats | Web stats</h1>
+  </header>
+
+  <section>
+    <ul>
+      <li><a href="/logout/">logout</a></li>
+    </ul>
+  </section>
+
+{% block content %}{% endblock %}
+  <footer>
+    <span>Django webstats</span>
+  </footer>
+{% endblock %}
