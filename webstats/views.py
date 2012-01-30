@@ -6,6 +6,7 @@ from django.template import Context, loader
 from django_webstats.webstats.models import Website
 from django_webstats.webstats.models import Visitor
 from datetime import datetime
+from datetime import timedelta
 from django.template import RequestContext
 from django.utils import simplejson
 from urlparse import urlparse
@@ -35,11 +36,25 @@ def webstats_main_page(request, id):
   #  month = " %s %d " % (calendar.month_name[m.month], m.year)
   #  months.append(month)
 
-  print id
-
+  #Visits, 60min interval for given visitor
   total_visits_array = []
+  delta = timedelta(hours=1)
   for m in range(1, 13):
-    total_visits_array.append(Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).count())
+    v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('remote_addr').distinct()
+    for v in v_a:
+      number_of_visits = 1
+      v_times = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id, remote_addr=v.get('remote_addr')).values('time')
+      last = v_times[0].get('time')
+      for t in v_times:
+        diff = t.get('time') - last
+        if diff >= delta:
+          number_of_visits += 1
+        last = t.get('time')
+      
+      total_visits_array.append(number_of_visits)
+
+  print "number_of_visits"
+  print number_of_visits 
 
   unique_visits_array = []
   for m in range(1, 13):
@@ -51,7 +66,6 @@ def webstats_main_page(request, id):
           
   js_data = simplejson.dumps(lu);
 
-  print js_data
 
   visitor_list = Visitor.objects.filter(website__id=id)
   w = visitor_list[0].website
