@@ -14,7 +14,7 @@ from collections import namedtuple
 
 import calendar
 
-Visit = namedtuple("Visit", "time entry_page exit_page")
+#Visit = namedtuple("Visit", "time entry_page exit_page")
 
 @login_required
 def webstats_index(request):
@@ -67,15 +67,14 @@ def webstats_main_page(request, id):
           
   js_data = simplejson.dumps(lu);
 
-  test_stats = Visit(datetime.now(), "entry", "exit")
-  print test_stats.time
+  #test_stats = Visit(datetime.now(), "entry", "exit")
+  #print test_stats.time
 
   visitor_list = Visitor.objects.filter(website__id=id)
   w = visitor_list[0].website
   c = Context({
     'visitor_list': visitor_list,
     'website': w,
-    'test_stats': test_stats,
     'js_data': js_data,
   })
   return render_to_response('webstats/webstats.html',
