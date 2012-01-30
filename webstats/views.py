@@ -35,13 +35,15 @@ def webstats_main_page(request, id):
   #  month = " %s %d " % (calendar.month_name[m.month], m.year)
   #  months.append(month)
 
+  print id
+
   total_visits_array = []
   for m in range(1, 13):
-    total_visits_array.append(Visitor.objects.filter(time__year='2012', time__month=m).count())
+    total_visits_array.append(Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).count())
 
   unique_visits_array = []
   for m in range(1, 13):
-    unique_visits_array.append(Visitor.objects.values('x_ff').distinct().filter(time__year='2012', time__month=m).count())
+    unique_visits_array.append(Visitor.objects.values('x_ff').distinct().filter(time__year='2012', time__month=m, website__id=id).count())
     
   lu = { 'categories' : ['Jan 2012', 'Feb 2012', 'Mar 2012', 'Apr 2012', 'May 2012', 'Jun 2012', 'Jul 2012', 'Aug 2012', 'Sep 2012', 'Oct 2012', 'Nov 2012', 'Dec 2012'],\
           'total_visits' : total_visits_array,\
@@ -51,9 +53,11 @@ def webstats_main_page(request, id):
 
   print js_data
 
-  visitor_list = Visitor.objects.all()
+  visitor_list = Visitor.objects.filter(website__id=id)
+  w = visitor_list[0].website
   c = Context({
     'visitor_list': visitor_list,
+    'website': w,
     'js_data': js_data,
   })
   return render_to_response('webstats/webstats.html',

@@ -13,8 +13,9 @@ Main page of the webstats.
 {% block content %}
   <section>
     <h2>Welcome, {{ user.username }}</h2>
-    <p>This is the main page of the web statistics.</p>
+    <p>Here are the web statistics for website : {{ website.domain }}.</p>
   </section>
+  <li><a href="/webstats/">back to list of monitored sites</a></li>
 
   {% if visitor_list %}
     <ul>
