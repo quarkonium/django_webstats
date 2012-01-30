@@ -10,7 +10,11 @@ from datetime import timedelta
 from django.template import RequestContext
 from django.utils import simplejson
 from urlparse import urlparse
+from collections import namedtuple
+
 import calendar
+
+Visit = namedtuple("Visit", "time entry_page exit_page")
 
 @login_required
 def webstats_index(request):
@@ -43,18 +47,15 @@ def webstats_main_page(request, id):
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('remote_addr').distinct()
     for v in v_a:
       number_of_visits = 1
-      v_times = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id, remote_addr=v.get('remote_addr')).values('time')
-      last = v_times[0].get('time')
+      v_times = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id, remote_addr=v.get('remote_addr')).order_by('time');
+      last = v_times[0].time
       for t in v_times:
-        diff = t.get('time') - last
+        diff = t.time - last
         if diff >= delta:
           number_of_visits += 1
-        last = t.get('time')
+        last = t.time
       
       total_visits_array.append(number_of_visits)
-
-  print "number_of_visits"
-  print number_of_visits 
 
   unique_visits_array = []
   for m in range(1, 13):
@@ -66,12 +67,15 @@ def webstats_main_page(request, id):
           
   js_data = simplejson.dumps(lu);
 
+  test_stats = Visit(datetime.now(), "entry", "exit")
+  print test_stats.time
 
   visitor_list = Visitor.objects.filter(website__id=id)
   w = visitor_list[0].website
   c = Context({
     'visitor_list': visitor_list,
     'website': w,
+    'test_stats': test_stats,
     'js_data': js_data,
   })
   return render_to_response('webstats/webstats.html',

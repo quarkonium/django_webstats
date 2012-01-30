@@ -1,0 +1,5 @@
+django-webstats
+===============================================================================
+A django based tool for monitoring website visitor activity.
+This works by including the following html into every website page to be monitored : <img src="http://server:8000/webstats/track/", where 'server' is the 
+host where django-webstats is running. 
