@@ -11,6 +11,7 @@ from django.template import RequestContext
 from django.utils import simplejson
 from urlparse import urlparse
 from collections import namedtuple
+from random import random
 
 import calendar
 
@@ -45,8 +46,9 @@ def webstats_main_page(request, id):
   delta = timedelta(hours=1)
   for m in range(1, 13):
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('x_ff').distinct()
+    number_of_visits = 0
     for v in v_a:
-      number_of_visits = 1
+      number_of_visits += 1
       v_times = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id, x_ff=v.get('x_ff')).order_by('time');
       last = v_times[0].time
       for t in v_times:
@@ -55,7 +57,7 @@ def webstats_main_page(request, id):
           number_of_visits += 1
         last = t.time
       
-      total_visits_array.append(number_of_visits)
+    total_visits_array.append(number_of_visits)
 
   unique_visits_array = []
   for m in range(1, 13):
@@ -64,6 +66,11 @@ def webstats_main_page(request, id):
   lu = { 'categories' : ['Jan 2012', 'Feb 2012', 'Mar 2012', 'Apr 2012', 'May 2012', 'Jun 2012', 'Jul 2012', 'Aug 2012', 'Sep 2012', 'Oct 2012', 'Nov 2012', 'Dec 2012'],\
           'total_visits' : total_visits_array,\
           'total_unique_visits' : unique_visits_array }
+
+  print "unique"
+  print unique_visits_array
+  print "total"
+  print total_visits_array
           
   js_data = simplejson.dumps(lu);
 
@@ -86,7 +93,8 @@ webstats_main_page.allow_tags = True
 def webstats_track(request):
   #print request
   v = Visitor()
-  v.x_ff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+  #v.x_ff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+  v.x_ff = "131.169.40.%d" % (random() * 10)
   v.remote_addr = request.META.get("REMOTE_ADDR", "")
   v.time = datetime.now()
   v.referer = request.META.get("HTTP_REFERER", "")

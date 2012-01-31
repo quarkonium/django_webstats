@@ -44,13 +44,14 @@ jQuery(document).ready(function() {
       borderWidth: 0
     },
     series: [{
-      name: 'Total visits',
+      name: 'Total visits'
       }, {
-        name: 'Unique visits',
+      name: 'Unique visitors'
         }]
   };
 
   chart_data['xAxis']['categories'] = data_test['categories'];
+  
   chart_data['series'][0]['data'] = data_test['total_visits'];
   chart_data['series'][1]['data'] = data_test['total_unique_visits'];
 
