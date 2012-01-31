@@ -59,6 +59,7 @@ def webstats_main_page(request, id):
         last = t.time
       
     total_visits_array.append(number_of_visits)
+    #total_visits_array[m-1] = number_of_visits
 
   unique_visits_array = []
   for m in range(1, 13):
@@ -94,8 +95,8 @@ webstats_main_page.allow_tags = True
 def webstats_track(request):
   #print request
   v = Visitor()
-  #v.x_ff = request.META.get("HTTP_X_FORWARDED_FOR", "")
-  v.x_ff = "131.169.40.%d" % (random() * 10)
+  v.x_ff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+  #v.x_ff = "131.169.40.%d" % (random() * 10)
   v.remote_addr = request.META.get("REMOTE_ADDR", "")
   v.time = datetime.now()
   v.referer = request.META.get("HTTP_REFERER", "")
