@@ -15,6 +15,7 @@ from random import random
 
 import calendar
 
+
 #Visit = namedtuple("Visit", "time entry_page exit_page")
 
 @login_required
