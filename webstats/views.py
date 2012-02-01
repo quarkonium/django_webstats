@@ -44,22 +44,31 @@ def webstats_main_page(request, id):
 
   #Visits, 60min interval for given visitor
   total_visits_array = []
+  page_views_per_visit = []
   delta = timedelta(hours=1)
   for m in range(1, 13):
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('x_ff').distinct()
     number_of_visits = 0
+
     for v in v_a:
       number_of_visits += 1
       v_times = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id, x_ff=v.get('x_ff')).order_by('time');
-      last = v_times[0].time
+
+      entry_time = last = v_times[0].time
       for t in v_times:
-        diff = t.time - last
-        if diff >= delta:
+        if t.time - last >= delta:
           number_of_visits += 1
+	  exit_time = last
+	  entry_time=t.time
+
         last = t.time
-      
+
     total_visits_array.append(number_of_visits)
-    #total_visits_array[m-1] = number_of_visits
+    if number_of_visits != 0:
+      page_views_per_visit.append(Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).count()/(number_of_visits * 1.0))
+    else:
+      page_views_per_visit.append(0)
+
 
   unique_visits_array = []
   for m in range(1, 13):
@@ -67,6 +76,7 @@ def webstats_main_page(request, id):
     
   lu = { 'categories' : ['Jan 2012', 'Feb 2012', 'Mar 2012', 'Apr 2012', 'May 2012', 'Jun 2012', 'Jul 2012', 'Aug 2012', 'Sep 2012', 'Oct 2012', 'Nov 2012', 'Dec 2012'],\
           'total_visits' : total_visits_array,\
+          'page_views_per_visit': page_views_per_visit,
           'total_unique_visits' : unique_visits_array }
 
   print "unique"
@@ -76,10 +86,7 @@ def webstats_main_page(request, id):
           
   js_data = simplejson.dumps(lu);
 
-  #test_stats = Visit(datetime.now(), "entry", "exit")
-  #print test_stats.time
-
-  visitor_list = Visitor.objects.filter(website__id=id)
+  visitor_list = Visitor.objects.filter(website__id=id).order_by('time')
   w = visitor_list[0].website
   c = Context({
     'visitor_list': visitor_list,
