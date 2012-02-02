@@ -44,8 +44,6 @@ def webstats_main_page(request, id):
   #Visits, 60min interval for given visitor
   total_visits_array = []
   page_views_per_visit = []
-  entry_pages = []
-  exit_pages = []
   delta = timedelta(hours=1)
   for m in range(1, 13):
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('x_ff').distinct()
@@ -55,19 +53,48 @@ def webstats_main_page(request, id):
       number_of_visits += 1
       v_times = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id, x_ff=v.get('x_ff')).order_by('time');
 
-      prev_time = v_times[0].time
+      prev = v_times[0]
       for t in v_times:
-        if t.time - prev_time >= delta:
+        if t.time - prev.time >= delta:
           number_of_visits += 1
 
-        prev_time = t.time
-        prev_path = t.path
+        prev = t
 
     total_visits_array.append(number_of_visits)
     if number_of_visits != 0:
       page_views_per_visit.append(Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).count()/(number_of_visits * 1.0))
     else:
       page_views_per_visit.append(0)
+
+  entry = []
+  exit = []
+  v_a = Visitor.objects.filter(time__year='2012', website__id=id).values('x_ff').distinct()
+  for v in v_a:
+    v_times = Visitor.objects.filter(time__year='2012', website__id=id, x_ff=v.get('x_ff')).order_by('time');
+
+    prev = v_times[0]
+    entry.append(prev.path)
+    for t in v_times:
+      if t.time - prev.time >= delta:
+        entry.append(t.path)
+        exit.append(prev.path)
+
+      prev = t
+
+    #Check whether last entry is also an exit point
+    now = datetime.today()
+    if now - v_times[len(v_times) - 1].time >= delta:
+      exit.append(v_times[len(v_times) - 1].path)
+
+  print "entries"
+  print entry
+  print "exits"
+  print exit
+
+  print "len(entry)"
+  print len(entry)
+  print "len(exit)"
+  print len(exit)
 
   unique_visits_array = []
   for m in range(1, 13):
