@@ -76,6 +76,8 @@ def webstats_main_page(request, id):
       page_views_per_visit.append(0)
 
   entry = []
+  time_on_entry = []
+  time_on_exit = []
   exit = []
   v_a = Visitor.objects.filter(time__year='2012', website__id=id).values('x_ff').distinct()
   for v in v_a:
@@ -83,9 +85,19 @@ def webstats_main_page(request, id):
 
     prev = v_times[0]
     entry.append(prev.path)
+    is_entry_page=True
     for t in v_times:
+      if t.path != prev.path and is_entry_page:
+        is_entry_page=False
+        time_on_entry.append(t.time - prev.time)
+
       if t.time - prev.time >= delta:
+	if is_entry_page :
+          time_on_entry.append(t.time - prev.time)
+       
+        time_on_exit.append(t.time - prev.time)
         entry.append(t.path)
+	is_entry_page=True
         exit.append(prev.path)
 
       prev = t
@@ -93,12 +105,20 @@ def webstats_main_page(request, id):
     #Check whether last entry is also an exit point
     now = datetime.today()
     if now - v_times[len(v_times) - 1].time >= delta:
+      time_on_entry.append(timedelta(hours=1))
+      time_on_exit.append(timedelta(hours=1))
       exit.append(v_times[len(v_times) - 1].path)
 
   print "entries"
   print entry
   print "exits"
   print exit
+  #print "time_on_entry"
+  #print time_on_entry
+  print "len(time_on_entry)"
+  print len(time_on_entry)
+  print "len(time_on_exit)"
+  print len(time_on_exit)
 
   print "len(entry)"
   print len(entry)
