@@ -11,11 +11,20 @@ from django.template import RequestContext
 from django.utils import simplejson
 from urlparse import urlparse
 from collections import namedtuple
+from collections import defaultdict
+
 from random import random
 
 import calendar
 
 #Visit = namedtuple("Visit", "time entry_page exit_page")
+
+def unique(seq): 
+  checked = []
+  for e in seq:
+    if e not in checked:
+      checked.append(e)
+  return checked
 
 @login_required
 def webstats_index(request):
@@ -95,6 +104,19 @@ def webstats_main_page(request, id):
   print len(entry)
   print "len(exit)"
   print len(exit)
+
+  d_entry = defaultdict(int)
+  for e in entry:
+    d_entry[e] += 1
+
+  unique_entry_pages = []
+  entry_page_frequency = []
+  for page, freq in d_entry.iteritems():
+    unique_entry_pages.append(page)
+    entry_page_frequency.append(freq)
+
+  print unique_entry_pages
+  print entry_page_frequency
 
   unique_visits_array = []
   for m in range(1, 13):
