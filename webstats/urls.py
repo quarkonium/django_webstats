@@ -5,5 +5,5 @@ urlpatterns = patterns('',
   # Main webstats entrance.
   (r'track/', webstats_track),
   (r'^main/(\d+)$', 'django_webstats.webstats.views.webstats_main_page'),
-  (r'^$', webstats_index),
+  (r'index/', webstats_index),
 )
