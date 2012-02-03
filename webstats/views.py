@@ -43,7 +43,7 @@ def webstats_main_page(request, id):
   If users are authenticated, direct them to the main page. Otherwise,
   take them to the login page.
   """
-
+ 
   #month_array = Visitor.objects.dates('time','month',order='DESC') 
 
   #months = []
@@ -54,8 +54,7 @@ def webstats_main_page(request, id):
   #Visits, 60min interval for given visitor
   total_visits_array = []
   page_views_per_visit = []
-  #delta = timedelta(hours=1)
-  delta = timedelta(seconds=30)
+  DELTA = timedelta(seconds=30)
   for m in range(1, 13):
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('x_ff').distinct()
     number_of_visits = 0
@@ -66,7 +65,7 @@ def webstats_main_page(request, id):
 
       prev = v_times[0]
       for t in v_times:
-        if t.time - prev.time >= delta:
+        if t.time - prev.time >= DELTA:
           number_of_visits += 1
 
         prev = t
@@ -78,7 +77,6 @@ def webstats_main_page(request, id):
       page_views_per_visit.append(0)
 
   entry = []
-  time_on_entry = []
   total_time_on_entry = {}
   time_on_exit = []
   total_time_on_exit = {}
@@ -93,15 +91,13 @@ def webstats_main_page(request, id):
     for t in v_times:
       if t.path != prev.path and is_entry_page:
         is_entry_page=False
-        time_on_entry.append(t.time - prev.time)
 	if total_time_on_entry.has_key(prev.path):
           total_time_on_entry[prev.path] += t.time - prev.time
         else: 
           total_time_on_entry[prev.path] = t.time - prev.time
 
-      if t.time - prev.time >= delta:
+      if t.time - prev.time >= DELTA:
         if is_entry_page :
-          time_on_entry.append(t.time - prev.time)
 	  if total_time_on_entry.has_key(prev.path):
             total_time_on_entry[prev.path] += t.time - prev.time
           else: 
@@ -121,18 +117,17 @@ def webstats_main_page(request, id):
 
     #Check whether last entry is also an exit point
     now = datetime.today()
-    if now - v_times[len(v_times) - 1].time >= delta:
-      time_on_entry.append(timedelta(hours=1))
+    if now - v_times[len(v_times) - 1].time >= DELTA:
       if total_time_on_entry.has_key(v_times[len(v_times) - 1].path):
-        total_time_on_entry[v_times[len(v_times) - 1].path] += timedelta(hours=1)
+        total_time_on_entry[v_times[len(v_times) - 1].path] += DELTA 
       else:
-        total_time_on_entry[v_times[len(v_times) - 1].path] = timedelta(hours=1)
+        total_time_on_entry[v_times[len(v_times) - 1].path] = DELTA 
 
-      time_on_exit.append(timedelta(hours=1))
+      time_on_exit.append(DELTA)
       if total_time_on_exit.has_key(v_times[len(v_times) - 1].path):
-        total_time_on_exit[v_times[len(v_times) - 1].path] += timedelta(hours=1)
+        total_time_on_exit[v_times[len(v_times) - 1].path] += DELTA 
       else:
-        total_time_on_exit[v_times[len(v_times) - 1].path] = timedelta(hours=1)
+        total_time_on_exit[v_times[len(v_times) - 1].path] = DELTA 
 
       exit.append(v_times[len(v_times) - 1].path)
 
@@ -140,8 +135,6 @@ def webstats_main_page(request, id):
   print entry
   print "exits"
   print exit
-  print "len(time_on_entry)"
-  print len(time_on_entry)
   print "total_time_on_entry"
   print total_time_on_entry
   print "total_time_on_exit"
