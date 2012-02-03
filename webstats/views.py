@@ -77,7 +77,9 @@ def webstats_main_page(request, id):
 
   entry = []
   time_on_entry = []
+  total_time_on_entry = {}
   time_on_exit = []
+  total_time_on_exit = {}
   exit = []
   v_a = Visitor.objects.filter(time__year='2012', website__id=id).values('x_ff').distinct()
   for v in v_a:
@@ -90,12 +92,25 @@ def webstats_main_page(request, id):
       if t.path != prev.path and is_entry_page:
         is_entry_page=False
         time_on_entry.append(t.time - prev.time)
+	if total_time_on_entry.has_key(prev.path):
+          total_time_on_entry[prev.path] += t.time - prev.time
+        else: 
+          total_time_on_entry[prev.path] = t.time - prev.time
 
       if t.time - prev.time >= delta:
-	if is_entry_page :
+        if is_entry_page :
           time_on_entry.append(t.time - prev.time)
+	  if total_time_on_entry.has_key(prev.path):
+            total_time_on_entry[prev.path] += t.time - prev.time
+          else: 
+            total_time_on_entry[prev.path] = t.time - prev.time
        
         time_on_exit.append(t.time - prev.time)
+	if total_time_on_exit.has_key(prev.path):
+          total_time_on_exit[prev.path] += t.time - prev.time
+        else: 
+          total_time_on_exit[prev.path] = t.time - prev.time
+
         entry.append(t.path)
 	is_entry_page=True
         exit.append(prev.path)
@@ -106,17 +121,30 @@ def webstats_main_page(request, id):
     now = datetime.today()
     if now - v_times[len(v_times) - 1].time >= delta:
       time_on_entry.append(timedelta(hours=1))
+      if total_time_on_entry.has_key(v_times[len(v_times) - 1].path):
+        total_time_on_entry[v_times[len(v_times) - 1].path] += timedelta(hours=1)
+      else:
+        total_time_on_entry[v_times[len(v_times) - 1].path] = timedelta(hours=1)
+
       time_on_exit.append(timedelta(hours=1))
+      if total_time_on_exit.has_key(v_times[len(v_times) - 1].path):
+        total_time_on_exit[v_times[len(v_times) - 1].path] += timedelta(hours=1)
+      else:
+        total_time_on_exit[v_times[len(v_times) - 1].path] = timedelta(hours=1)
+
       exit.append(v_times[len(v_times) - 1].path)
 
   print "entries"
   print entry
   print "exits"
   print exit
-  #print "time_on_entry"
-  #print time_on_entry
   print "len(time_on_entry)"
   print len(time_on_entry)
+  print "total_time_on_entry"
+  print total_time_on_entry
+  print "total_time_on_exit"
+  print total_time_on_exit
+
   print "len(time_on_exit)"
   print len(time_on_exit)
 
@@ -165,7 +193,6 @@ webstats_main_page.allow_tags = True
 def webstats_track(request):
   v = Visitor()
   v.x_ff = request.META.get("HTTP_X_FORWARDED_FOR", "")
-  #v.x_ff = "131.169.40.%d" % (random() * 10)
   v.remote_addr = request.META.get("REMOTE_ADDR", "")
   v.time = datetime.now()
   v.referer = request.META.get("HTTP_REFERER", "")
