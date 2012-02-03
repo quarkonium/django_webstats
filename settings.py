@@ -73,6 +73,7 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 LOGIN_URL = '/login/'
 SECRET_KEY = '123456789'
 
+LOGIN_REDIRECT_URL='/webstats/index'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
