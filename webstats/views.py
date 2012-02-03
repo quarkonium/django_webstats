@@ -15,6 +15,7 @@ from collections import defaultdict
 
 from random import random
 
+import decimal
 import calendar
 
 #Visit = namedtuple("Visit", "time entry_page exit_page")
@@ -153,18 +154,40 @@ def webstats_main_page(request, id):
   print "len(exit)"
   print len(exit)
 
-  d_entry = defaultdict(int)
-  for e in entry:
-    d_entry[e] += 1
+  entry_page_frequencies = {}
+  for page in entry:
+    if entry_page_frequencies.has_key(page):
+      entry_page_frequencies[page] += 1
+    else:
+      entry_page_frequencies[page] = 1
 
-  unique_entry_pages = []
-  entry_page_frequency = []
-  for page, freq in d_entry.iteritems():
-    unique_entry_pages.append(page)
-    entry_page_frequency.append(freq)
+  print entry_page_frequencies
 
-  print unique_entry_pages
-  print entry_page_frequency
+  exit_page_frequencies = {}
+  for page in exit:
+    if exit_page_frequencies.has_key(page):
+      exit_page_frequencies[page] += 1
+    else:
+      exit_page_frequencies[page] = 1
+
+  print exit_page_frequencies
+
+  #prepare the entry page statistics
+  entry_statistics = []
+  for page in entry_page_frequencies:
+    stats = { "page" : page, "freq" : entry_page_frequencies[page],\
+              "view_time" : timedelta(seconds=round(total_time_on_entry[page].seconds / (entry_page_frequencies[page] * 1.0)))}
+    entry_statistics.append(stats)
+
+  print entry_statistics
+
+  exit_statistics = []
+  for page in exit_page_frequencies:
+    stats = { "page" : page, "freq" : exit_page_frequencies[page],\
+              "view_time" : total_time_on_exit[page] }
+    exit_statistics.append(stats)
+
+  print exit_statistics
 
   unique_visits_array = []
   for m in range(1, 13):
@@ -182,6 +205,8 @@ def webstats_main_page(request, id):
   c = Context({
     'visitor_list': visitor_list,
     'website': w,
+    'entry_statistics': entry_statistics,
+    'exit_statistics': entry_statistics,
     'js_data': js_data,
   })
   return render_to_response('webstats/webstats.html',

@@ -22,9 +22,25 @@ Main page of the webstats.
         <li>{{ v.x_ff }} {{ v.referer }} {{ v.time }}</li>
       {% endfor %}
     </ul>
-      {% else %}
-        <p>There were no visitors.</p>
+  {% else %}
+    <p>There were no visitors.</p>
   {% endif %}
+
+  <table>
+    <tr>
+      <th>Request</th>
+      <th>Entered</th>
+      <th>View time, average</th>
+    </tr>
+    {% for stats in entry_statistics %}
+      <tr>
+        <td>{{ stats.page  }}</td>
+        <td>{{ stats.freq }}</td>
+        <td>{{ stats.view_time }}</td>
+      </tr>
+    {% endfor %}    
+  </table>
+
   <script>
     data_from_django = "{{ js_data }}";
     data_from_django = data_from_django.replace(/&quot;/g,'\'');
