@@ -184,7 +184,7 @@ def webstats_main_page(request, id):
   exit_statistics = []
   for page in exit_page_frequencies:
     stats = { "page" : page, "freq" : exit_page_frequencies[page],\
-              "view_time" : total_time_on_exit[page] }
+              "view_time" : timedelta(seconds=round(total_time_on_exit[page].seconds / (exit_page_frequencies[page] * 1.0))) }
     exit_statistics.append(stats)
 
   print exit_statistics
@@ -206,7 +206,7 @@ def webstats_main_page(request, id):
     'visitor_list': visitor_list,
     'website': w,
     'entry_statistics': entry_statistics,
-    'exit_statistics': entry_statistics,
+    'exit_statistics': exit_statistics,
     'js_data': js_data,
   })
   return render_to_response('webstats/webstats.html',

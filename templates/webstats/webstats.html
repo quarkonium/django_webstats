@@ -26,7 +26,7 @@ Main page of the webstats.
     <p>There were no visitors.</p>
   {% endif %}
 
-  <h3>Table of statistics for entry pages</h3>
+  <h3>Entry page statistics</h3>
   <table style="border: 1px solid green; width: 50%">
     <tr>
       <th>Request</th>
@@ -34,6 +34,22 @@ Main page of the webstats.
       <th>View time, average</th>
     </tr>
     {% for stats in entry_statistics %}
+      <tr>
+        <td>{{ stats.page  }}</td>
+        <td>{{ stats.freq }}</td>
+        <td>{{ stats.view_time }}</td>
+      </tr>
+    {% endfor %}    
+  </table>
+
+  <h3>Exit page statistics</h3>
+  <table style="border: 1px solid green; width: 50%">
+    <tr>
+      <th>Request</th>
+      <th>Entered</th>
+      <th>View time, average</th>
+    </tr>
+    {% for stats in exit_statistics %}
       <tr>
         <td>{{ stats.page  }}</td>
         <td>{{ stats.freq }}</td>
