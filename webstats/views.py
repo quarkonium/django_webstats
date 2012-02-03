@@ -54,7 +54,8 @@ def webstats_main_page(request, id):
   #Visits, 60min interval for given visitor
   total_visits_array = []
   page_views_per_visit = []
-  delta = timedelta(hours=1)
+  #delta = timedelta(hours=1)
+  delta = timedelta(seconds=30)
   for m in range(1, 13):
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('x_ff').distinct()
     number_of_visits = 0
@@ -176,7 +177,7 @@ def webstats_main_page(request, id):
   entry_statistics = []
   for page in entry_page_frequencies:
     stats = { "page" : page, "freq" : entry_page_frequencies[page],\
-              "view_time" : timedelta(seconds=round(total_time_on_entry[page].seconds / (entry_page_frequencies[page] * 1.0)))}
+              "view_time" : timedelta(seconds=round(total_time_on_entry[page].seconds / (entry_page_frequencies[page] * 1.0))) if total_time_on_entry.has_key(page) else " " }
     entry_statistics.append(stats)
 
   print entry_statistics
