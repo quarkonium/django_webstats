@@ -13,8 +13,10 @@ from urlparse import urlparse
 from collections import namedtuple
 from collections import defaultdict
 
+
 from random import random
 
+import operator
 import decimal
 import calendar
 
@@ -81,7 +83,7 @@ def webstats_main_page(request, id):
             entry_statistics[t.path] = { 'entered' : 1, 'duration' : timedelta(0) }
         
 	  if exit_statistics.has_key(prev.path) :
-	    exit_statistics[prev.path]['entered'] += 1 
+	    exit_statistics[prev.path]['exited'] += 1 
 	    exit_statistics[prev.path]['duration'] += t.time - prev.time
           else: 
 	    exit_statistics[prev.path] = { 'exited' : 1, 'duration' : t.time - prev.time }
@@ -102,6 +104,13 @@ def webstats_main_page(request, id):
     else:
       page_views_per_visit.append(0)
 
+  for page in entry_statistics :
+    entry_statistics[page]['average'] = timedelta(seconds=round(entry_statistics[page]['duration'].seconds / entry_statistics[page]['entered'] * 1.0))
+
+  for page in exit_statistics :
+    exit_statistics[page]['average'] = timedelta(seconds=round(exit_statistics[page]['duration'].seconds / exit_statistics[page]['exited'] * 1.0))
+
+  print sorted(entry_statistics.items(), key=lambda x: x[1]['entered'])
 
   print entry_statistics
   print exit_statistics
@@ -127,8 +136,8 @@ def webstats_main_page(request, id):
   c = Context({
     'visitor_list': visitor_list,
     'website': w,
-    'entry_statistics': entry_statistics,
-    'exit_statistics': exit_statistics,
+    'entry_statistics': sorted(entry_statistics.items(), key=lambda x: x[1]['entered'], reverse=True),
+    'exit_statistics': sorted(exit_statistics.items(), key=lambda x: x[1]['exited'], reverse=True),
     'js_data': js_data,
   })
   return render_to_response('webstats/webstats.html',

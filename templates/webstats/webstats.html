@@ -30,14 +30,16 @@ Main page of the webstats.
   <table style="border: 1px solid green; width: 50%">
     <tr>
       <th>Request</th>
-      <th>Entered</th>
-      <th>View time, average</th>
+      <th>Exited</th>
+      <th>Total viewing duration</th>
+      <th>Viewing time, average</th>
     </tr>
-    {% for page, value in entry_statistics.items %}
+    {% for stats in entry_statistics %}
       <tr>
-        <td>{{ page }}</td>
-        <td>{{ value.entered }}</td>
-        <td>{{ value.duration }}</td>
+        <td>{{ stats.0  }}</td>
+        <td>{{ stats.1.entered }}</td>
+        <td>{{ stats.1.duration }}</td>
+        <td>{{ stats.1.average }}</td>
       </tr>
     {% endfor %}    
   </table>
@@ -47,13 +49,15 @@ Main page of the webstats.
     <tr>
       <th>Request</th>
       <th>Exited</th>
-      <th>View time, average</th>
+      <th>Total viewing duration</th>
+      <th>Viewing time, average</th>
     </tr>
-    {% for page, value in exit_statistics.items %}
+    {% for stats in exit_statistics %}
       <tr>
-        <td>{{ page  }}</td>
-        <td>{{ value.exited }}</td>
-        <td>{{ value.duration }}</td>
+        <td>{{ stats.0  }}</td>
+        <td>{{ stats.1.exited }}</td>
+        <td>{{ stats.1.duration }}</td>
+        <td>{{ stats.1.average }}</td>
       </tr>
     {% endfor %}    
   </table>
