@@ -33,11 +33,11 @@ Main page of the webstats.
       <th>Entered</th>
       <th>View time, average</th>
     </tr>
-    {% for stats in entry_statistics %}
+    {% for page, value in entry_statistics.items %}
       <tr>
-        <td>{{ stats.page  }}</td>
-        <td>{{ stats.freq }}</td>
-        <td>{{ stats.view_time }}</td>
+        <td>{{ page }}</td>
+        <td>{{ value.entered }}</td>
+        <td>{{ value.duration }}</td>
       </tr>
     {% endfor %}    
   </table>
@@ -49,11 +49,11 @@ Main page of the webstats.
       <th>Exited</th>
       <th>View time, average</th>
     </tr>
-    {% for stats in exit_statistics %}
+    {% for page, value in exit_statistics.items %}
       <tr>
-        <td>{{ stats.page  }}</td>
-        <td>{{ stats.freq }}</td>
-        <td>{{ stats.view_time }}</td>
+        <td>{{ page  }}</td>
+        <td>{{ value.exited }}</td>
+        <td>{{ value.duration }}</td>
       </tr>
     {% endfor %}    
   </table>

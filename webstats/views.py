@@ -54,6 +54,8 @@ def webstats_main_page(request, id):
   #Visits, 60min interval for given visitor
   total_visits_array = []
   page_views_per_visit = []
+  entry_statistics = {}
+  exit_statistics = {}
   DELTA = timedelta(seconds=30)
   for m in range(1, 13):
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('x_ff').distinct()
@@ -64,8 +66,32 @@ def webstats_main_page(request, id):
       v_times = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id, x_ff=v.get('x_ff')).order_by('time');
 
       prev = v_times[0]
+      entry_statistics[prev.path] = { 'entered' : 1, 'duration' : timedelta(0) }
+      current_entry = prev
+      entry_page=True
       for t in v_times:
         if t.time - prev.time >= DELTA:
+          if entry_page :
+            entry_statistics[current_entry.path]['duration'] += t.time - current_entry.time
+
+          if entry_statistics.has_key(t.path) :
+            entry_statistics[t.path]['entered'] += 1
+            entry_statistics[t.path]['time'] = t.time 
+          else:
+            entry_statistics[t.path] = { 'entered' : 1, 'duration' : timedelta(0) }
+        
+	  if exit_statistics.has_key(prev.path) :
+	    exit_statistics[prev.path]['entered'] += 1 
+	    exit_statistics[prev.path]['duration'] += t.time - prev.time
+          else: 
+	    exit_statistics[prev.path] = { 'exited' : 1, 'duration' : t.time - prev.time }
+
+	  current_entry = t
+	  entry_page = True
+        elif t.path != current_entry.path and entry_page :
+          entry_statistics[current_entry.path]['duration'] += t.time - current_entry.time
+	  entry_page = False
+            
           number_of_visits += 1
 
         prev = t
@@ -76,112 +102,14 @@ def webstats_main_page(request, id):
     else:
       page_views_per_visit.append(0)
 
-  entry = []
-  total_time_on_entry = {}
-  time_on_exit = []
-  total_time_on_exit = {}
-  exit = []
-  v_a = Visitor.objects.filter(time__year='2012', website__id=id).values('x_ff').distinct()
-  for v in v_a:
-    v_times = Visitor.objects.filter(time__year='2012', website__id=id, x_ff=v.get('x_ff')).order_by('time');
-
-    prev = v_times[0]
-    entry.append(prev.path)
-    is_entry_page=True
-    for t in v_times:
-      if t.path != prev.path and is_entry_page:
-        is_entry_page=False
-	if total_time_on_entry.has_key(prev.path):
-          total_time_on_entry[prev.path] += t.time - prev.time
-        else: 
-          total_time_on_entry[prev.path] = t.time - prev.time
-
-      if t.time - prev.time >= DELTA:
-        if is_entry_page :
-	  if total_time_on_entry.has_key(prev.path):
-            total_time_on_entry[prev.path] += t.time - prev.time
-          else: 
-            total_time_on_entry[prev.path] = t.time - prev.time
-       
-        time_on_exit.append(t.time - prev.time)
-	if total_time_on_exit.has_key(prev.path):
-          total_time_on_exit[prev.path] += t.time - prev.time
-        else: 
-          total_time_on_exit[prev.path] = t.time - prev.time
-
-        entry.append(t.path)
-	is_entry_page=True
-        exit.append(prev.path)
-
-      prev = t
-
-    #Check whether last entry is also an exit point
-    now = datetime.today()
-    if now - v_times[len(v_times) - 1].time >= DELTA:
-      if total_time_on_entry.has_key(v_times[len(v_times) - 1].path):
-        total_time_on_entry[v_times[len(v_times) - 1].path] += DELTA 
-      else:
-        total_time_on_entry[v_times[len(v_times) - 1].path] = DELTA 
-
-      time_on_exit.append(DELTA)
-      if total_time_on_exit.has_key(v_times[len(v_times) - 1].path):
-        total_time_on_exit[v_times[len(v_times) - 1].path] += DELTA 
-      else:
-        total_time_on_exit[v_times[len(v_times) - 1].path] = DELTA 
-
-      exit.append(v_times[len(v_times) - 1].path)
-
-  print "entries"
-  print entry
-  print "exits"
-  print exit
-  print "total_time_on_entry"
-  print total_time_on_entry
-  print "total_time_on_exit"
-  print total_time_on_exit
-
-  print "len(time_on_exit)"
-  print len(time_on_exit)
-
-  print "len(entry)"
-  print len(entry)
-  print "len(exit)"
-  print len(exit)
-
-  entry_page_frequencies = {}
-  for page in entry:
-    if entry_page_frequencies.has_key(page):
-      entry_page_frequencies[page] += 1
-    else:
-      entry_page_frequencies[page] = 1
-
-  print entry_page_frequencies
-
-  exit_page_frequencies = {}
-  for page in exit:
-    if exit_page_frequencies.has_key(page):
-      exit_page_frequencies[page] += 1
-    else:
-      exit_page_frequencies[page] = 1
-
-  print exit_page_frequencies
-
-  #prepare the entry page statistics
-  entry_statistics = []
-  for page in entry_page_frequencies:
-    stats = { "page" : page, "freq" : entry_page_frequencies[page],\
-              "view_time" : timedelta(seconds=round(total_time_on_entry[page].seconds / (entry_page_frequencies[page] * 1.0))) if total_time_on_entry.has_key(page) else " " }
-    entry_statistics.append(stats)
 
   print entry_statistics
-
-  exit_statistics = []
-  for page in exit_page_frequencies:
-    stats = { "page" : page, "freq" : exit_page_frequencies[page],\
-              "view_time" : timedelta(seconds=round(total_time_on_exit[page].seconds / (exit_page_frequencies[page] * 1.0))) }
-    exit_statistics.append(stats)
-
   print exit_statistics
+
+  #for page in exit_page_frequencies:
+  #  stats = { "page" : page, "freq" : exit_page_frequencies[page],\
+  #            "view_time" : timedelta(seconds=round(total_time_on_exit[page].seconds / (exit_page_frequencies[page] * 1.0))) }
+  #  exit_statistics.append(stats)
 
   unique_visits_array = []
   for m in range(1, 13):
