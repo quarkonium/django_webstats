@@ -88,7 +88,7 @@ def webstats_main_page(request, id):
       for t in v_times:
         if t.time - prev.time >= DELTA:
           if entry_page :
-            entry_statistics[current_entry.path]['duration'] += t.time.seconds - current_entry.time.seconds
+            entry_statistics[current_entry.path]['duration'] += t.time - current_entry.time
 
           if entry_statistics.has_key(t.path) :
             entry_statistics[t.path]['entered'] += 1
@@ -105,7 +105,7 @@ def webstats_main_page(request, id):
 	  current_entry = t
 	  entry_page = True
         elif t.path != current_entry.path and entry_page :
-          entry_statistics[current_entry.path]['duration'] += t.time.seconds - current_entry.time
+          entry_statistics[current_entry.path]['duration'] += t.time - current_entry.time
 	  entry_page = False
             
           number_of_visits += 1
