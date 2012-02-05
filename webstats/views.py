@@ -161,11 +161,9 @@ def webstats_track(request):
   v.remote_addr = request.META.get("REMOTE_ADDR", "")
 
   now = datetime.now()
-  #delta = (0 if now.microsecond < 500000 else 1000000) - now.microsecond
-  #now = now + timedelta(microseconds=delta)
+  delta = (0 if now.microsecond < 500000 else 1000000) - now.microsecond
 
-  now = datetime.datetime.now()
-  v.time = now - timedelta(microseconds=now.microsecond)
+  v.time = now + timedelta(microseconds=delta)
 
   v.referer = request.META.get("HTTP_REFERER", "")
   v.user_agent = request.META.get("HTTP_USER_AGENT", "")
