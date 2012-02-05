@@ -129,11 +129,6 @@ def webstats_main_page(request, id):
   print entry_statistics
   print exit_statistics
 
-  #for page in exit_page_frequencies:
-  #  stats = { "page" : page, "freq" : exit_page_frequencies[page],\
-  #            "view_time" : timedelta(seconds=round(total_time_on_exit[page].seconds / (exit_page_frequencies[page] * 1.0))) }
-  #  exit_statistics.append(stats)
-
   unique_visits_array = []
   for m in range(1, 13):
     unique_visits_array.append(Visitor.objects.values('x_ff').distinct().filter(time__year='2012', time__month=m, website__id=id).count())
@@ -167,7 +162,7 @@ def webstats_track(request):
 
   now = datetime.now()
   delta = (0 if now.microsecond < 500000 else 1000000) - now.microsecond
-  now = now + datetime.timedelta(microseconds=delta)
+  now = now + timedelta(microseconds=delta)
 
   v.time = now
 
