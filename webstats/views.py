@@ -12,15 +12,16 @@ from django.utils import simplejson
 from urlparse import urlparse
 from collections import namedtuple
 from collections import defaultdict
-
-
+from xml.dom import minidom
 from random import random
 
+import urllib
 import operator
 import decimal
 import calendar
 
-#Visit = namedtuple("Visit", "time entry_page exit_page")
+GEO_IP_LOOKUP_URL = 'http://api.hostip.info/?ip=%s'
+GML_NS = 'http://www.opengis.net/gml'
 
 def unique(seq): 
   checked = []
@@ -28,6 +29,29 @@ def unique(seq):
     if e not in checked:
       checked.append(e)
   return checked
+
+
+def ip_location_lookup(ip):
+  """
+  Look up the location information based on the IP address passed in
+  """
+  dom = minidom.parse(urllib.urlopen(GEO_IP_LOOKUP_URL % ip))
+  e = dom.getElementsByTagName('Hostip')[0]
+  location = e.getElementsByTagNameNS(GML_NS, 'name')[0].firstChild.data.partition(',')
+
+  try:
+    latlong = e.getElementsByTagNameNS(GML_NS, 'coordinates')[0].firstChild.data.partition(',')
+  except:
+    latlong = None
+
+  return {
+    'country_code': e.getElementsByTagName('countryAbbrev')[0].firstChild.data,
+    'country_name': e.getElementsByTagName('countryName')[0].firstChild.data,
+    'locality': location[0].strip(),
+    'region': location[2].strip(),
+    'longitude': latlong[0].strip() if latlong else '',
+    'latitude': latlong[2].strip() if latlong else ''
+  }
 
 @login_required
 def webstats_index(request):
@@ -41,25 +65,15 @@ def webstats_index(request):
 
 @login_required
 def webstats_main_page(request, id):
-  """
-  If users are authenticated, direct them to the main page. Otherwise,
-  take them to the login page.
-  """
  
-  #month_array = Visitor.objects.dates('time','month',order='DESC') 
-
-  #months = []
-  #for m in month_array:
-  #  month = " %s %d " % (calendar.month_name[m.month], m.year)
-  #  months.append(month)
-
-  #Visits, 60min interval for given visitor
+  #Visits, session is deemed to be ended after 60min of inactivity 
+  location_data = {}
   total_visits_array = []
   page_views_per_visit = []
   entry_statistics = {}
   exit_statistics = {}
   DELTA = timedelta(hours=1)
-  for m in range(1, 13):
+  for m in range(1, 13) :
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('x_ff').distinct()
     number_of_visits = 0
 
@@ -74,7 +88,7 @@ def webstats_main_page(request, id):
       for t in v_times:
         if t.time - prev.time >= DELTA:
           if entry_page :
-            entry_statistics[current_entry.path]['duration'] += t.time - current_entry.time
+            entry_statistics[current_entry.path]['duration'] += t.time.seconds - current_entry.time.seconds
 
           if entry_statistics.has_key(t.path) :
             entry_statistics[t.path]['entered'] += 1
@@ -91,7 +105,7 @@ def webstats_main_page(request, id):
 	  current_entry = t
 	  entry_page = True
         elif t.path != current_entry.path and entry_page :
-          entry_statistics[current_entry.path]['duration'] += t.time - current_entry.time
+          entry_statistics[current_entry.path]['duration'] += t.time.seconds - current_entry.time
 	  entry_page = False
             
           number_of_visits += 1
@@ -150,7 +164,13 @@ def webstats_track(request):
   v = Visitor()
   v.x_ff = request.META.get("HTTP_X_FORWARDED_FOR", "")
   v.remote_addr = request.META.get("REMOTE_ADDR", "")
-  v.time = datetime.now()
+
+  now = datetime.now()
+  delta = (0 if now.microsecond < 500000 else 1000000) - now.microsecond
+  now = now + datetime.timedelta(microseconds=delta)
+
+  v.time = now
+
   v.referer = request.META.get("HTTP_REFERER", "")
   v.user_agent = request.META.get("HTTP_USER_AGENT", "")
 
