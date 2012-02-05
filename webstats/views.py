@@ -58,7 +58,7 @@ def webstats_main_page(request, id):
   page_views_per_visit = []
   entry_statistics = {}
   exit_statistics = {}
-  DELTA = timedelta(seconds=30)
+  DELTA = timedelta(hours=1)
   for m in range(1, 13):
     v_a = Visitor.objects.filter(time__year='2012', time__month=m, website__id=id).values('x_ff').distinct()
     number_of_visits = 0
